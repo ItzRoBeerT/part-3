@@ -45,6 +45,18 @@ app.get('/info', (request, response) => {
     ${current_time}`);
 });
 
+app.get('/api/persons/:id', (request, response) => {
+	const id = request.params.id;
+	console.log(id);
+	const person = data.find((person) => person.id === id);
+
+	if (!person) {
+		return response.status(400).json({
+			error: "Id doesn't exists",
+		});
+	} else response.send(person);
+});
+
 app.listen(PORT, () => {
 	console.log(`Server running on port ${PORT}`);
 });
