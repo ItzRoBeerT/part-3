@@ -4,7 +4,7 @@ app.use(express.json());
 
 const PORT = process.env.PORT || 3001;
 
-const data = [
+let data = [
 	{
 		id: '1',
 		name: 'Arto Hellas',
@@ -55,6 +55,23 @@ app.get('/api/persons/:id', (request, response) => {
 			error: "Id doesn't exists",
 		});
 	} else response.send(person);
+});
+
+app.delete('/api/persons/:id', (request, response) => {
+	const id = request.params.id;
+	const person = data.find((person) => person.id === id);
+
+	if (!person) {
+		return response.status(400).json({
+			error: "Id doesn't exists",
+		});
+	} else {
+		data = data.filter((person) => person.id !== id);
+		response.status(200).json({
+			success: `${person.name} has been deleted successfully!`,
+			persons: data,
+		});
+	}
 });
 
 app.listen(PORT, () => {
