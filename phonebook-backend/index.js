@@ -88,6 +88,20 @@ app.post('/api/persons', (request, response) => {
 			error: 'No content found!',
 		});
 	} else {
+		if (!personData.name || !personData.number) {
+			return response.status(400).json({
+				error: 'Name or Number is missing',
+			});
+		}
+
+		const personExists = data.find((person) => person.name === personData.name);
+
+		if (personExists) {
+			return response.status(400).json({
+				error: 'Name must be unique',
+			});
+		}
+
 		const newPerson = {
 			...personData,
 			id: generateId(),
