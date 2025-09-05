@@ -2,7 +2,16 @@ const express = require('express');
 const morgan = require('morgan');
 const app = express();
 app.use(express.json());
-app.use(morgan('tiny'));
+
+morgan.token('body', (req, res) => {
+	if (req.method === 'POST' && req.body) {
+		return JSON.stringify(req.body);
+	}
+	return '';
+});
+
+app.use(morgan(':method :url :status :res[content-length] - :response-time ms :body'));
+
 const PORT = process.env.PORT || 3001;
 
 let data = [
