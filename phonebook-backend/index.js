@@ -27,6 +27,12 @@ let data = [
 	},
 ];
 
+const generateId = () => {
+	const maxId = Math.max(...data.map((person) => Number(person.id)));
+
+	return maxId + 1;
+};
+
 app.get('/', (request, response) => {
 	response.send('<h1>Hello World!</h1>');
 });
@@ -71,6 +77,24 @@ app.delete('/api/persons/:id', (request, response) => {
 			success: `${person.name} has been deleted successfully!`,
 			persons: data,
 		});
+	}
+});
+
+app.post('/api/persons', (request, response) => {
+	const personData = request.body;
+
+	if (!personData) {
+		response.status(400).json({
+			error: 'No content found!',
+		});
+	} else {
+		const newPerson = {
+			...personData,
+			id: generateId(),
+		};
+		data = data.concat(newPerson);
+		console.log('Persons', data);
+		response.json(newPerson);
 	}
 });
 
