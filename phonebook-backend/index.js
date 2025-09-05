@@ -35,6 +35,16 @@ app.get('/api/persons', (request, response) => {
 	response.send(data);
 });
 
+app.get('/info', (request, response) => {
+	const total_people = data.length;
+	const current_time = new Date();
+
+	response.send(`
+    Phonebook has info for ${total_people} people 
+    <br/>
+    ${current_time}`);
+});
+
 app.listen(PORT, () => {
 	console.log(`Server running on port ${PORT}`);
 });
