@@ -84,9 +84,10 @@ const App = () => {
 			});
 	};
 
-	const filteredNumbers = filter ? persons.filter((person) => person.name.toLowerCase().includes(filter)) : persons;
+	const filteredNumbers = filter ? persons.filter((person) => person.name.toLowerCase().includes(filter.toLocaleLowerCase())) : persons;
 
 	console.log('Filtered numbers:', filteredNumbers);
+	console.log('filter', filter);
 	console.log('All persons:', persons);
 
 	return (
