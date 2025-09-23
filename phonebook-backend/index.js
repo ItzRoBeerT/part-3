@@ -1,9 +1,11 @@
+require('dotenv').config();
 const express = require('express');
 const morgan = require('morgan');
 const cors = require('cors');
+const User = require('./models/user');
 
 const app = express();
-app.use(express.static('dist')) // Serve static files from the 'dist' directory
+app.use(express.static('dist')); // Serve static files from the 'dist' directory
 app.use(express.json());
 app.use(cors());
 
@@ -18,45 +20,18 @@ app.use(morgan(':method :url :status :res[content-length] - :response-time ms :b
 
 const PORT = process.env.PORT || 3001;
 
-let data = [
-	{
-		id: '1',
-		name: 'Arto Hellas',
-		number: '040-123456',
-	},
-	{
-		id: '2',
-		name: 'Ada Lovelace',
-		number: '39-44-5323523',
-	},
-	{
-		id: '3',
-		name: 'Dan Abramov',
-		number: '12-43-234345',
-	},
-	{
-		id: '4',
-		name: 'Mary Poppendieck',
-		number: '39-23-6423122',
-	},
-];
-
-const generateId = () => {
-	const maxId = Math.max(...data.map((person) => Number(person.id)));
-
-	return maxId + 1;
-};
-
 app.get('/', (request, response) => {
 	response.send('<h1>Hello World!</h1>');
 });
 
 app.get('/api/persons', (request, response) => {
-	response.send(data);
+	User.find({}).then((users) => {
+		response.json(users);
+	});
 });
 
-app.get('/info', (request, response) => {
-	const total_people = data.length;
+app.get('/info', async (request, response) => {
+	const total_people = await User.countDocuments({});
 	const current_time = new Date();
 
 	response.send(`
@@ -68,30 +43,27 @@ app.get('/info', (request, response) => {
 app.get('/api/persons/:id', (request, response) => {
 	const id = request.params.id;
 	console.log(id);
-	const person = data.find((person) => person.id === id);
-
-	if (!person) {
-		return response.status(400).json({
-			error: "Id doesn't exists",
-		});
-	} else response.send(person);
+	User.findById(id).then((person) => {
+		if (person) {
+			response.json(person);
+		} else {
+			response.status(404).json({
+				error: "Id doesn't exist",
+			});
+		}
+	});
 });
 
 app.delete('/api/persons/:id', (request, response) => {
 	const id = request.params.id;
-	const person = data.find((person) => person.id === id);
-
-	if (!person) {
-		return response.status(400).json({
-			error: "Id doesn't exists",
+	User.findByIdAndDelete(id)
+		.then(() => {
+			response.status(204).end();
+		})
+		.catch((error) => {
+			console.error(error);
+			response.status(400).send({ error: 'malformatted id' });
 		});
-	} else {
-		data = data.filter((person) => person.id !== id);
-		response.status(200).json({
-			success: `${person.name} has been deleted successfully!`,
-			persons: data,
-		});
-	}
 });
 
 app.post('/api/persons', (request, response) => {
@@ -108,21 +80,26 @@ app.post('/api/persons', (request, response) => {
 			});
 		}
 
-		const personExists = data.find((person) => person.name === personData.name);
+		User.findOne({ name: personData.name })
+			.then((existingUser) => {
+				if (existingUser) {
+					return response.status(400).json({
+						error: 'Name must be unique',
+					});
+				}
 
-		if (personExists) {
-			return response.status(400).json({
-				error: 'Name must be unique',
+				const user = new User({
+					name: personData.name,
+					number: personData.number,
+				});
+				user.save().then((savedUser) => {
+					response.json(savedUser);
+				});
+			})
+			.catch((error) => {
+				console.error(error);
+				response.status(500).json({ error: 'Internal server error' });
 			});
-		}
-
-		const newPerson = {
-			...personData,
-			id: generateId(),
-		};
-		data = data.concat(newPerson);
-		console.log('Persons', data);
-		response.json(newPerson);
 	}
 });
 
