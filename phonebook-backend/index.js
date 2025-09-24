@@ -43,6 +43,7 @@ app.get('/info', async (request, response) => {
 app.get('/api/persons/:id', (request, response, next) => {
 	const id = request.params.id;
 	console.log(id);
+	
 	User.findById(id)
 		.then((person) => {
 			response.json(person);
