@@ -39,7 +39,7 @@ const App = () => {
 				setUserAdded(`Added ${response.name}`);
 			});
 		} else {
-			if (personExists.phone !== newPerson.phone) {
+			if (personExists.number !== newPerson.number) {
 				if (
 					window.confirm(
 						`${personExists.name} is already added to phonebook, replace the old number with the new one`
