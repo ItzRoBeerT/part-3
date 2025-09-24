@@ -31,13 +31,19 @@ const App = () => {
 		console.log('personExists', personExists);
 
 		if (!personExists) {
-			phoneService.create(newPerson).then((response) => {
-				setPersons([...persons, response]);
-				setNewName('');
-				setNewNumber('');
-				console.log('Person added:', response);
-				setUserAdded(`Added ${response.name}`);
-			});
+			phoneService
+				.create(newPerson)
+				.then((response) => {
+					setPersons([...persons, response]);
+					setNewName('');
+					setNewNumber('');
+					console.log('Person added:', response);
+					setUserAdded(`Added ${response.name}`);
+				})
+				.catch((error) => {
+					console.error('Error adding person:', error);
+					setError(`${error.response.data.error}`);
+				});
 		} else {
 			if (personExists.number !== newPerson.number) {
 				if (
@@ -84,7 +90,9 @@ const App = () => {
 			});
 	};
 
-	const filteredNumbers = filter ? persons.filter((person) => person.name.toLowerCase().includes(filter.toLocaleLowerCase())) : persons;
+	const filteredNumbers = filter
+		? persons.filter((person) => person.name.toLowerCase().includes(filter.toLocaleLowerCase()))
+		: persons;
 
 	console.log('Filtered numbers:', filteredNumbers);
 	console.log('filter', filter);
